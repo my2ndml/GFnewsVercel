@@ -8,11 +8,15 @@ module.exports = async (req, res) => {
 
         // Recupera il feed RSS
         const response = await axios.get(feedUrl);
+        
+        console.log("Response data:", response.data);  // Log dei dati grezzi
+
         const xml = response.data;
 
         // Converti il XML in JSON
         xml2js.parseString(xml, { explicitArray: false }, (err, result) => {
             if (err) {
+                console.log('Error parsing XML:', err);  // Log dell'errore di parsing
                 return res.status(500).json({ error: 'Errore nel parsing del feed RSS' });
             }
 
