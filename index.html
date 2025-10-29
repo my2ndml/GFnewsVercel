@@ -120,4 +120,17 @@
                         console.log("Dati non validi ricevuti:", data);
                         document.getElementById('news-wall').innerHTML = "Nessuna notizia disponibile.";
                     }
-               
+                })
+                .catch((error) => {
+                    console.error("Errore durante il caricamento del feed:", error);
+                    document.getElementById('news-wall').innerHTML = "Errore nel caricamento delle notizie.";
+                });
+        }
+
+        // Carica i feed quando la pagina è pronta
+        window.onload = loadRSS;
+    </script>
+
+</body>
+
+</html>
