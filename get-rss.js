@@ -9,31 +9,38 @@ module.exports = async (req, res) => {
         // Recupera il feed RSS
         const response = await axios.get(feedUrl);
         
-        console.log("Response data:", response.data);  // Log dei dati grezzi
+        // Verifica il tipo di contenuto restituito
+        if (response.headers['content-type'].includes('text/html')) {
+            console.log('Errore: ricevuto HTML invece di XML');
+            return res.status(500).json({ error: 'Ricevuto contenuto HTML anziché XML' });
+        }
 
+        // Ottieni il contenuto XML
         const xml = response.data;
 
         // Converti il XML in JSON
         xml2js.parseString(xml, { explicitArray: false }, (err, result) => {
             if (err) {
-                console.log('Error parsing XML:', err);  // Log dell'errore di parsing
+                console.log('Errore nel parsing del feed XML:', err);
                 return res.status(500).json({ error: 'Errore nel parsing del feed RSS' });
             }
 
+            // Estrarre gli elementi del feed
             const items = result.feed.entry || [];
             const newsItems = items.map((entry) => ({
                 title: entry.title || 'No title available',
                 description: entry.content || 'No description available',
                 link: entry.link.href || '#',
                 date: entry.published || '',
-                image: '' // Inserisci qui la logica per estrarre le immagini se esistono
+                image: '' // Se c'è un'immagine, estrai l'URL (da aggiungere in futuro)
             }));
 
-            // Ritorna i dati del feed in formato JSON
+            // Restituisci i dati del feed in formato JSON
             return res.status(200).json(newsItems);
         });
     } catch (error) {
-        console.error('Errore durante il recupero del feed:', error);
-        res.status(500).json({ error: 'Errore durante il recupero del feed RSS' });
+        // Log l'errore e restituisco un errore 500
+        console.error('Errore durante il recupero del feed RSS:', error);
+        return res.status(500).json({ error: 'Errore durante il recupero del feed RSS' });
     }
 };
